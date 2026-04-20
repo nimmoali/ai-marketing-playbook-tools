@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The AI Marketing Playbook — Post Generator v3</title>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f5f5f3;--bg3:#ebebea;
+  --bgi:#e6f1fb;--bgs:#eaf3de;--bgw:#faeeda;--bgd:#fcebeb;
+  --tx:#1a1a1a;--tx2:#6b6b6b;--tx3:#a0a0a0;
+  --txi:#185fa5;--txs:#3b6d11;--txw:#854f0b;--txd:#a32d2d;
+  --b:rgba(0,0,0,0.1);--b2:rgba(0,0,0,0.2);--bi:#378add;
+  --r:8px;--rl:12px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1e;--bg2:#272727;--bg3:#303030;
+    --bgi:#0c2a45;--bgs:#162408;--bgw:#2e1c04;--bgd:#2a0e0e;
+    --tx:#e8e8e8;--tx2:#9a9a9a;--tx3:#666;
+    --txi:#85b7eb;--txs:#97c459;--txw:#ef9f27;--txd:#f09595;
+    --b:rgba(255,255,255,0.1);--b2:rgba(255,255,255,0.2);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg2);color:var(--tx);min-height:100vh;padding:2rem 1rem}
+.wrap{max-width:700px;margin:0 auto}
+header{margin-bottom:1.5rem}
+header h1{font-size:17px;font-weight:500;color:var(--tx);margin-bottom:3px}
+header p{font-size:13px;color:var(--tx2)}
+.panel{background:var(--bg);border:0.5px solid var(--b);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.lbl{font-size:11px;color:var(--tx2);letter-spacing:.05em;text-transform:uppercase;font-weight:500;display:block;margin-bottom:5px}
+input,select{width:100%;font-family:var(--font);font-size:14px;color:var(--tx);background:var(--bg);border:0.5px solid var(--b2);border-radius:var(--r);padding:8px 12px;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--bi);box-shadow:0 0 0 3px rgba(55,138,221,0.12)}
+button{font-family:var(--font);font-size:13px;font-weight:500;color:var(--tx);background:var(--bg);border:0.5px solid var(--b2);border-radius:var(--r);padding:8px 14px;cursor:pointer;transition:all .15s}
+button:hover{background:var(--bg2)}
+button:active{transform:scale(0.98)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.sec{font-size:12px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+
+/* Topic category pills */
+.cat-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.cat-pill{font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;border:0.5px solid var(--b2);cursor:pointer;background:var(--bg);color:var(--tx2);transition:all .15s}
+.cat-pill:hover{border-color:var(--bi);color:var(--txi)}
+.cat-pill.active{background:var(--bgi);color:var(--txi);border-color:var(--bi)}
+
+/* Topic suggestion cards */
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.topic-card{background:var(--bg2);border:0.5px solid var(--b);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all .15s;text-align:left}
+.topic-card:hover{border-color:var(--bi);background:var(--bgi)}
+.topic-card.selected{border:1.5px solid var(--bi);background:var(--bgi)}
+.topic-card .ttitle{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px;line-height:1.3}
+.topic-card.selected .ttitle{color:var(--txi)}
+.topic-card .tmeta{font-size:11px;color:var(--tx2);line-height:1.3}
+.topic-card .trend{font-size:10px;color:var(--txs);background:var(--bgs);padding:2px 7px;border-radius:10px;display:inline-block;margin-top:4px}
+
+/* Trending tension */
+.tension-box{background:var(--bgw);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;display:none}
+.tension-box .tlabel{font-size:10px;font-weight:500;color:var(--txw);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.tension-box .ttext{font-size:13px;color:var(--tx);line-height:1.4}
+
+/* Angle buttons */
+.angle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.angle-btn{background:var(--bg);border:0.5px solid var(--b);border-radius:var(--r);padding:9px 12px;cursor:pointer;text-align:left;font-family:var(--font);transition:all .15s}
+.angle-btn:hover{border-color:var(--b2)}
+.angle-btn.selected{border:1.5px solid var(--bi);background:var(--bgi)}
+.angle-btn .at{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:2px}
+.angle-btn.selected .at{color:var(--txi)}
+.angle-btn .ad{font-size:11px;color:var(--tx2);line-height:1.3}
+
+/* Format tabs */
+.fmt-wrap{display:flex;gap:6px;margin-bottom:10px}
+.fmt-btn{flex:1;font-size:12px;font-weight:500;text-align:center;padding:7px 10px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--b);background:var(--bg);color:var(--tx2);font-family:var(--font);transition:all .15s}
+.fmt-btn.selected{border:1.5px solid var(--bi);background:var(--bgi);color:var(--txi)}
+
+/* Output */
+.output-panel{background:var(--bg);border:0.5px solid var(--b);border-radius:var(--rl);padding:1.25rem;margin-top:12px}
+.hook-preview{background:var(--bg2);border:0.5px solid var(--b);border-radius:var(--r);padding:.9rem;margin-bottom:12px}
+.hook-line{font-size:14px;font-weight:500;color:var(--tx);line-height:1.5;min-height:20px}
+.hook-meta{font-size:11px;color:var(--tx2);margin-top:6px}
+.hook-meta span{margin-right:10px}
+.cok{color:var(--txs)}.cwarn{color:var(--txw)}
+.post-body{font-size:14px;line-height:1.8;color:var(--tx);white-space:pre-wrap;border-top:0.5px solid var(--b);padding-top:1rem;margin-top:1rem}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--bg2);color:var(--tx2);border:0.5px solid var(--b)}
+.badge.ok{background:var(--bgs);color:var(--txs);border-color:transparent}
+.badge.warn{background:var(--bgw);color:var(--txw);border-color:transparent}
+.badge.info{background:var(--bgi);color:var(--txi);border-color:transparent}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1;font-size:13px}
+.slide{background:var(--bg2);border:0.5px solid var(--b);border-radius:var(--r);padding:.7rem 1rem;margin-bottom:6px}
+.slide-num{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.slide-text{font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap}
+.err{color:var(--txd);font-size:13px;margin-top:8px;font-style:italic}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--b);border-top-color:var(--tx2);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.divider{border:none;border-top:0.5px solid var(--b);margin:14px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>The AI Marketing Playbook</h1>
+  <p>LinkedIn post generator — v3</p>
+</header>
+
+<!-- STEP 1: TOPIC -->
+<div class="panel">
+  <div class="sec" style="margin-bottom:10px">Step 1 — pick a topic area</div>
+
+  <div class="cat-wrap" id="cats">
+    <button class="cat-pill active" data-cat="content" onclick="selectCat(this)">Content ops</button>
+    <button class="cat-pill" data-cat="cx" onclick="selectCat(this)">Customer experience</button>
+    <button class="cat-pill" data-cat="leads" onclick="selectCat(this)">Lead nurturing</button>
+    <button class="cat-pill" data-cat="campaign" onclick="selectCat(this)">Campaign workflow</button>
+    <button class="cat-pill" data-cat="reporting" onclick="selectCat(this)">Reporting & analytics</button>
+    <button class="cat-pill" data-cat="research" onclick="selectCat(this)">Market research</button>
+    <button class="cat-pill" data-cat="team" onclick="selectCat(this)">Team productivity</button>
+    <button class="cat-pill" data-cat="seo" onclick="selectCat(this)">SEO & search</button>
+  </div>
+
+  <div class="topic-grid" id="topic-grid"></div>
+
+  <div class="tension-box" id="tension-box">
+    <div class="tlabel">Trending tension — counter this on LinkedIn</div>
+    <div class="ttext" id="tension-text"></div>
+  </div>
+
+  <div>
+    <label class="lbl">Or write your own topic</label>
+    <input type="text" id="custom-topic" placeholder="e.g. Using AI to personalise email sequences by segment"/>
+  </div>
+</div>
+
+<!-- STEP 2: DETAILS -->
+<div class="panel">
+  <div class="sec" style="margin-bottom:10px">Step 2 — add your details</div>
+
+  <div class="row2">
+    <div>
+      <label class="lbl">Proof / data</label>
+      <input type="text" id="proof" placeholder="e.g. Saved 4hrs/week, 3x reply rate"/>
+    </div>
+    <div>
+      <label class="lbl">Tools used</label>
+      <input type="text" id="tools" placeholder="e.g. Make, Claude API, HubSpot"/>
+    </div>
+  </div>
+
+  <div class="row3">
+    <div>
+      <label class="lbl">Hook style</label>
+      <select id="hook">
+        <option value="stat">Specific number</option>
+        <option value="counter">Counter-intuitive</option>
+        <option value="cost">What it was costing</option>
+        <option value="mistake">Mistake / admission</option>
+        <option value="callout">Audience callout</option>
+      </select>
+    </div>
+    <div>
+      <label class="lbl">Angle</label>
+      <select id="angle">
+        <option value="workflow">Workflow reveal</option>
+        <option value="myth">Myth bust</option>
+        <option value="experiment">Live experiment</option>
+        <option value="cost">Cost/time breakdown</option>
+        <option value="tension">Counter the trend</option>
+      </select>
+    </div>
+    <div>
+      <label class="lbl">Tone</label>
+      <select id="tone">
+        <option value="bourdain">Bourdain (default)</option>
+        <option value="data">Data-led</option>
+        <option value="exec">Executive edge</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label class="lbl" style="margin-bottom:6px">Post format</label>
+    <div class="fmt-wrap">
+      <button class="fmt-btn selected" data-fmt="text" onclick="selectFmt(this)">Text post</button>
+      <button class="fmt-btn" data-fmt="carousel" onclick="selectFmt(this)">Carousel script</button>
+      <button class="fmt-btn" data-fmt="poll" onclick="selectFmt(this)">Poll post</button>
+    </div>
+  </div>
+
+  <button id="gen-btn" onclick="generate()" style="width:100%;padding:10px;font-size:14px;margin-top:4px">Generate post ↗</button>
+  <div id="err" class="err" style="display:none"></div>
+</div>
+
+<!-- OUTPUT -->
+<div id="output" style="display:none">
+  <div class="output-panel">
+    <div class="lbl">Hook preview — what they see before "see more"</div>
+    <div class="hook-preview">
+      <div class="hook-line" id="hook-l1"></div>
+      <div class="hook-line" id="hook-l2" style="margin-top:2px"></div>
+      <div class="hook-meta">
+        <span>Line 1: <span id="c1">—</span>/62</span>
+        <span>Line 2: <span id="c2">—</span>/50</span>
+      </div>
+    </div>
+    <div id="post-body" class="post-body"></div>
+    <div id="slides-container" style="display:none;margin-top:1rem;border-top:0.5px solid var(--b);padding-top:1rem"></div>
+    <div class="badges" id="badges"></div>
+  </div>
+  <div class="actions">
+    <button onclick="copyPost()">Copy post</button>
+    <button onclick="generate()">Regenerate ↗</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ── TOPIC DATA ──────────────────────────────────────────────────────────────
+const TOPICS = {
+  content: {
+    tension: "Most people talk about 'scaling content with AI' — but they mean volume. More posts, more pages, more noise. The conversation misses quality, relevance, and what customers actually need to read next.",
+    topics: [
+      { title: "Automating content briefs from GSC data", heat: "High reach" },
+      { title: "Building a content repurposing workflow end-to-end", heat: "High reach" },
+      { title: "Using AI to identify content gaps vs. customer intent", heat: "Trending" },
+      { title: "Cutting case study production from weeks to days", heat: "High reach" },
+      { title: "Auto-generating meta and social copy from one source", heat: "Steady" },
+      { title: "AI-assisted content localisation for multiple markets", heat: "Rising" },
+    ]
+  },
+  cx: {
+    tension: "Brands talk about 'personalisation at scale' but still send the same email to 50k people. The gap between what AI makes possible for CX and what teams actually deploy is enormous — and that's the honest story.",
+    topics: [
+      { title: "Automating personalised follow-up based on behaviour", heat: "Trending" },
+      { title: "Building a feedback loop from reviews into content", heat: "Rising" },
+      { title: "Using AI to map and respond to customer journey gaps", heat: "Trending" },
+      { title: "Real-time content adaptation by audience segment", heat: "High reach" },
+      { title: "Automating post-purchase nurture that doesn't feel robotic", heat: "Rising" },
+      { title: "Voice-of-customer mining with AI at speed", heat: "Steady" },
+    ]
+  },
+  leads: {
+    tension: "Everyone's automating outreach volume. Cold email sequences, LinkedIn DMs, scraped lists. The LinkedIn conversation rewards this. The results don't. The real opportunity is in smarter nurture, not more noise.",
+    topics: [
+      { title: "Building a lead scoring workflow without a data team", heat: "High reach" },
+      { title: "Automating nurture sequences that adapt to intent signals", heat: "Trending" },
+      { title: "Using AI to write follow-ups that actually convert", heat: "High reach" },
+      { title: "Connecting CRM data to AI to personalise at scale", heat: "Rising" },
+      { title: "Building a re-engagement workflow for cold leads", heat: "Steady" },
+      { title: "Automating lead research before sales calls", heat: "Trending" },
+    ]
+  },
+  campaign: {
+    tension: "Campaign planning still takes weeks because it's buried in briefs, approvals and spreadsheets. AI tools exist to compress this. Most teams haven't connected the dots yet — that's the story worth telling.",
+    topics: [
+      { title: "Building a full campaign brief in under an hour with AI", heat: "High reach" },
+      { title: "Automating UTM tagging and campaign tracking setup", heat: "Steady" },
+      { title: "AI-assisted A/B test planning and variant creation", heat: "Trending" },
+      { title: "From campaign idea to live assets in one workflow", heat: "Rising" },
+      { title: "Automating campaign performance reports for stakeholders", heat: "Trending" },
+      { title: "Using AI to adapt one campaign for multiple regions", heat: "Rising" },
+    ]
+  },
+  reporting: {
+    tension: "Marketing teams spend more time building reports than acting on them. AI can flip that ratio. But the LinkedIn conversation is stuck on dashboards and visualisation tools, not on what you do with the insight.",
+    topics: [
+      { title: "Automating weekly performance summaries with AI", heat: "High reach" },
+      { title: "Connecting GA4 and CRM data for a single source of truth", heat: "Trending" },
+      { title: "Building a no-code anomaly alert for key metrics", heat: "Rising" },
+      { title: "Auto-generating insight narratives from raw data", heat: "Trending" },
+      { title: "Reducing reporting time from days to minutes", heat: "High reach" },
+      { title: "Using AI to turn data into stakeholder-ready stories", heat: "Rising" },
+    ]
+  },
+  research: {
+    tension: "Market research used to mean surveys and agencies. Now teams can run continuous, low-cost research workflows using AI. Most people don't know where to start — and the ones who do aren't sharing the actual method.",
+    topics: [
+      { title: "Building a competitor monitoring workflow with Apify + AI", heat: "Trending" },
+      { title: "Mining Reddit and forums for real customer language", heat: "Rising" },
+      { title: "Using AI to analyse review data across competitors", heat: "High reach" },
+      { title: "Automating trend identification from multiple sources", heat: "Trending" },
+      { title: "Building a lightweight customer insight engine", heat: "Rising" },
+      { title: "Turning social listening data into content opportunities", heat: "Steady" },
+    ]
+  },
+  team: {
+    tension: "Productivity content on LinkedIn is mostly about time-blocking and morning routines. The real productivity gains in marketing teams right now are coming from workflow automation — and nobody's talking about the actual mechanics.",
+    topics: [
+      { title: "Building approval workflows that don't kill momentum", heat: "Trending" },
+      { title: "Automating briefing and onboarding for freelancers", heat: "Rising" },
+      { title: "How we cut team meetings by 40% with async AI summaries", heat: "High reach" },
+      { title: "Using AI to standardise output quality across a team", heat: "Trending" },
+      { title: "Building a prompt library your whole team actually uses", heat: "High reach" },
+      { title: "Automating internal reporting so teams focus on action", heat: "Steady" },
+    ]
+  },
+  seo: {
+    tension: "Everyone's publishing AI-generated content at volume. Google's getting better at spotting it, and audiences are already tuning it out. The teams winning in search are using AI to do the thinking, not skip it.",
+    topics: [
+      { title: "Automating SEO briefs from GSC + competitor data", heat: "High reach" },
+      { title: "Using AI to cluster keywords into content pillars", heat: "Trending" },
+      { title: "Building an internal linking workflow at scale", heat: "Steady" },
+      { title: "AI-assisted content refresh: find and fix fast", heat: "Rising" },
+      { title: "Automating rank tracking alerts and response workflows", heat: "Steady" },
+      { title: "Using search intent data to brief better content", heat: "Trending" },
+    ]
+  }
+};
+
+const SYSTEM = `You are the voice behind "The AI Marketing Playbook" — a LinkedIn brand for marketing managers and agency teams who are done with vague AI content and want workflows that actually work.
+
+WHO WE ARE:
+We're the friend in the industry who's already broken the workflow, figured out what actually runs, and is telling you straight — no fluff, no hype cycle, no "here's why AI is the future" nonsense. We've already shipped it. We know what broke. We know what saved six hours. We're sharing the mechanic, not the concept.
+
+We cover the full marketing stack: content ops, customer experience, lead nurturing, campaign workflow, reporting and analytics, market research, team productivity, SEO. Every post connects what gets faster to what gets better for the humans on the receiving end of the work.
+
+THE VOICE — read this carefully:
+Think Anthony Bourdain writing a kitchen manual. Direct. A little dry. Occasionally self-deprecating. Never impressed by its own cleverness. The kind of person who rolls their eyes at a keynote but respects someone who can actually cook.
+
+The brand uses "we" — but only when "we" is doing work. "We tried this" is good. "We believe that AI can transform your marketing strategy" is garbage.
+
+Switch to the direct address ("Stop doing X", "Try this instead", "Here's the bit nobody tells you") when giving instruction. That's where the edge lives.
+
+WHAT GOOD SOUNDS LIKE — study these rhythms:
+
+Good: "Three weeks to write a case study. We got it to four days. Here's the workflow, not the theory."
+Bad: "We're excited to share how AI can streamline your case study process."
+
+Good: "Nobody talks about what breaks. The Make scenario that failed. The prompt that hallucinated the client name. We're talking about it."
+Bad: "Here's how to build a robust, scalable content workflow using cutting-edge AI tools."
+
+Good: "Your nurture sequence reads like it was written by a committee. It probably was. Here's how to fix that in an afternoon."
+Bad: "Personalisation at scale is now possible with AI-powered marketing automation."
+
+Good: "Spent £400 on an agency brief. Rebuilt the process with Claude API and a spreadsheet. Took three hours. Saved it to a Notion template."
+Bad: "We leverage AI to optimise our campaign briefing workflows for maximum efficiency."
+
+THE RULES — non-negotiable, but hold them lightly. They serve the voice, not the other way around:
+- No em dashes (— or –). Ever.
+- No exclamation marks. Enthusiasm is earned through specificity, not punctuation.
+- No hype words: game-changer, revolutionary, unlock, leverage, transformative, supercharge, seamless, cutting-edge, robust, scalable
+- No asterisks, no markdown, no bullet dashes in text posts
+- Contractions always. "It's" not "it is". "We're" not "we are". "Don't" not "do not".
+- Numbers beat adjectives. "Six hours" beats "significant time". "£400" beats "considerable budget".
+- Show the failure. A post that only shows success reads like a press release.
+- Maximum 4 hashtags at the end. Treat them like a receipt, not a strategy.
+- One closing question. Make it specific enough that someone could actually answer it from their own experience.
+
+HOOK RULES:
+- Line 1: maximum 62 characters. This is the only thing standing between you and the scroll.
+- Line 2: maximum 50 characters. Make it sting a little.
+- Empty line before the body.
+- Never open with "We" on line 1. Open with the fact, the number, the uncomfortable truth, or the direct address.
+- A hook is a promise. The body has to deliver it. Don't tease something you don't actually explain.
+
+OUTPUT FORMAT:
+- Text post: plain text only. No formatting symbols. No markdown.
+- Carousel: JSON array — [{"slide":1,"headline":"...","body":"..."},...] Cover = punchy headline only. Slides 2-7 = one mechanic or insight each, written like a tip from someone who's done it. Final slide = closing question + hashtags.
+- Poll: post text, then POLL_OPTIONS: on a new line, then 4 options on separate lines. Options should feel like real choices a real marketer would have an opinion on.
+
+LENGTH:
+Target 1,200 to 1,600 characters for text posts. That is roughly 200 to 260 words — the proven sweet spot for dwell time and completion rate on LinkedIn. Do not pad. Do not repeat. If you have made the point, stop.
+
+FLOW — this is critical:
+Do not write steps. Do not number anything. Do not write "Step 1", "Next", "Then we", "Finally" as mechanical signposts.
+
+Instead, write the workflow as someone talking through what they actually did. Use momentum words that carry the reader forward:
+
+Good: "That feeds straight into Make."
+Good: "From there, the brief lands in Notion in about 40 seconds."
+Good: "The bit that surprised us: the tone matching."
+Good: "It broke the first time. Turned out the prompt was too long for the context window."
+Bad: "Step 1: Connect your data source. Step 2: Build your Make scenario. Step 3: Review the output."
+Bad: "Next, we move on to the brief generation stage."
+
+The test: read it back. Does it sound like someone explaining something over a coffee, or like someone reading from a process document? It should always be the former.
+
+No preamble. No sign-off. No explanation of what you are about to write. Just the post.`;
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let selCat = 'content';
+let selTopic = '';
+let selFmt = 'text';
+let lastPost = '';
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderTopics('content');
+
+function selectCat(el){
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  selCat = el.dataset.cat;
+  selTopic = '';
+  renderTopics(selCat);
+}
+
+function renderTopics(cat){
+  const data = TOPICS[cat];
+  const grid = document.getElementById('topic-grid');
+  grid.innerHTML = data.topics.map((t,i)=>
+    `<button class="topic-card" data-idx="${i}" onclick="selectTopic(this,'${esc(t.title)}')">
+      <div class="ttitle">${t.title}</div>
+      <span class="trend">${t.heat}</span>
+    </button>`
+  ).join('');
+  const tb = document.getElementById('tension-box');
+  tb.style.display = 'none';
+}
+
+function selectTopic(el, title){
+  document.querySelectorAll('.topic-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selTopic = title;
+  document.getElementById('custom-topic').value = '';
+  const tb = document.getElementById('tension-box');
+  document.getElementById('tension-text').textContent = TOPICS[selCat].tension;
+  tb.style.display = 'block';
+}
+
+function selectFmt(el){
+  document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selFmt = el.dataset.fmt;
+}
+
+function esc(s){ return s.replace(/'/g,"\\'"); }
+
+// ── GENERATE ─────────────────────────────────────────────────────────────────
+async function generate(){
+  const customTopic = document.getElementById('custom-topic').value.trim();
+  const topic = customTopic || selTopic;
+  if(!topic){ showErr('Select a topic or write your own above.'); return; }
+
+  const proof = document.getElementById('proof').value.trim();
+  const tools = document.getElementById('tools').value.trim();
+  const hook = document.getElementById('hook').value;
+  const angle = document.getElementById('angle').value;
+  const tone = document.getElementById('tone').value;
+  const tension = selTopic ? TOPICS[selCat]?.tension : '';
+
+  const angleDesc = {
+    workflow:'Show the exact workflow step by step. Name every tool. Give the precise sequence. Make it replicable.',
+    myth:'Open by naming the common belief. Dismantle it with specifics from real experience. Name who gets this wrong.',
+    experiment:'Frame as something actually tried. Include what was expected, what happened, what failed, and what changed.',
+    cost:'Lead with what this used to cost in time, money or headcount. Show before/after with specific numbers.',
+    tension: tension ? `Counter this dominant narrative on LinkedIn: "${tension}" — take the opposite, more honest position backed by real workflow experience.` : 'Take the honest counter-position to conventional thinking on this topic.'
+  }[angle];
+
+  const hookDesc = {
+    stat:'Line 1 opens with a specific number or time saving. No context, just the stark fact.',
+    counter:'Line 1 states something that contradicts common advice. Make the reader question what they knew.',
+    cost:'Line 1 names what something was costing — in hours, money, or people. Painful and specific.',
+    mistake:'Line 1 admits something we got wrong or took too long to figure out.',
+    callout:'Line 1 speaks directly to a specific type of marketer or their exact frustration.'
+  }[hook];
+
+  const toneDesc = {
+    bourdain:'Default Playbook voice. Dry, direct, no ceremony. The person who has already done it and is slightly impatient with people who have not. Occasional dark humour. Never sarcastic enough to alienate.',
+    data:'Lead hard on the number. Every claim earns its place with a specific figure. The voice is still dry but the proof does the heavy lifting.',
+    exec:'Senior, confident, no softening. Writes like someone who has sat in enough boardrooms to stop being impressed by buzzwords. Blunt without being aggressive.'
+  }[tone];
+
+  const fmtDesc = {
+    text:'Write a text post.',
+    carousel:'Write a carousel as a JSON array of slides. 7-9 slides. Cover = punchy hook only. Each middle slide = one concrete mechanic or insight, written like a tip from someone who has done it. Final slide = closing question + hashtags.',
+    poll:'Write a text post that earns the poll with a real setup, not just a tease. Then output POLL_OPTIONS: followed by exactly 4 options that feel like genuine choices a working marketer would have an opinion on.'
+  }[selFmt];
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Writing...';
+  document.getElementById('err').style.display = 'none';
+  document.getElementById('output').style.display = 'none';
+
+  const userMsg = `${fmtDesc}
+
+Topic: ${topic}
+Angle: ${angleDesc}
+Hook style: ${hookDesc}
+Voice: ${toneDesc}
+${proof ? `Proof/data to use specifically, not generically: ${proof}` : 'No data provided. Invent plausible but realistic numbers. Specific enough to feel real, not round enough to feel made up.'}
+${tools ? `Tools to name specifically: ${tools}` : ''}
+
+Hard rules: Hook line 1 must be 62 characters or fewer. Hook line 2 must be 50 characters or fewer. Target 200 to 260 words total. Do not number steps or use mechanical signpost words. Write the workflow as someone talking through what they did, not filing a report. Show what the workflow does for the person on the receiving end, not just the person doing it. If nothing went wrong, include something plausible that could have.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:SYSTEM,
+        messages:[{role:'user',content:userMsg}]
+      })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const text = data.content.map(b=>b.text||'').join('');
+
+    if(selFmt==='carousel') renderCarousel(text);
+    else if(selFmt==='poll') renderPoll(text);
+    else renderText(text);
+
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('output').scrollIntoView({behavior:'smooth',block:'start'});
+  } catch(e){
+    showErr('Something went wrong: '+e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate post ↗';
+}
+
+function renderText(text){
+  lastPost = text;
+  const lines = text.split('\n');
+  const l1 = (lines[0]||'').trim();
+  const l2 = (lines[1]||'').trim();
+  setHook(l1,l2);
+  document.getElementById('post-body').textContent = text;
+  document.getElementById('slides-container').style.display = 'none';
+  renderBadges(text,'Text post');
+}
+
+function renderCarousel(raw){
+  let slides = [];
+  try{ slides = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+  catch(e){ showErr('Carousel parse error — regenerate.'); return; }
+  lastPost = slides.map(s=>`SLIDE ${s.slide}: ${s.headline}\n${s.body||''}`).join('\n\n');
+  const cover = slides[0];
+  setHook(cover.headline||'','');
+  document.getElementById('post-body').textContent = '';
+  const sc = document.getElementById('slides-container');
+  sc.style.display = 'block';
+  sc.innerHTML = '<div class="lbl" style="margin-bottom:8px">Carousel slides</div>'+
+    slides.map(s=>`<div class="slide"><div class="slide-num">Slide ${s.slide}</div><div class="slide-text"><strong>${s.headline||''}</strong>${s.body?'\n'+s.body:''}</div></div>`).join('');
+  renderBadges(lastPost,'Carousel');
+}
+
+function renderPoll(text){
+  lastPost = text;
+  const parts = text.split('POLL_OPTIONS:');
+  const postText = parts[0].trim();
+  const opts = parts[1]?parts[1].trim().split('\n').filter(l=>l.trim()):[];
+  const lines = postText.split('\n');
+  setHook((lines[0]||'').trim(),(lines[1]||'').trim());
+  document.getElementById('post-body').textContent = postText;
+  const sc = document.getElementById('slides-container');
+  sc.style.display = 'block';
+  sc.innerHTML = '<div class="lbl" style="margin-bottom:8px">Poll options</div>'+
+    opts.map((o,i)=>`<div class="slide"><div class="slide-num">Option ${i+1}</div><div class="slide-text">${o.trim()}</div></div>`).join('');
+  renderBadges(postText,'Poll');
+}
+
+function setHook(l1,l2){
+  document.getElementById('hook-l1').textContent = l1;
+  document.getElementById('hook-l2').textContent = l2;
+  const c1 = document.getElementById('c1');
+  const c2 = document.getElementById('c2');
+  c1.textContent = l1.length;
+  c1.className = l1.length<=62?'cok':'cwarn';
+  c2.textContent = l2.length||'—';
+  c2.className = (!l2.length||l2.length<=50)?'cok':'cwarn';
+}
+
+function renderBadges(text, fmt){
+  const words = text.trim().split(/\s+/).length;
+  const htags = (text.match(/#\w+/g)||[]).length;
+  const hasEm = /—|–/.test(text);
+  const hasEx = /!/.test(text);
+  const hasHype = /game.changer|revolutionary|unlock|leverage|transformative|supercharge|seamless/i.test(text);
+  document.getElementById('badges').innerHTML = [
+    {l:words+' words', c:words>=180&&words<=270?'ok':'warn'},
+    {l:htags+' hashtags', c:htags<=4?'ok':'warn'},
+    {l:hasEm||hasEx?'Voice breach':'Voice ok', c:hasEm||hasEx?'warn':'ok'},
+    {l:hasHype?'Hype word found':'No hype words', c:hasHype?'warn':'ok'},
+    {l:fmt, c:'info'}
+  ].map(b=>`<span class="badge ${b.c}">${b.l}</span>`).join('');
+}
+
+function copyPost(){
+  if(!lastPost) return;
+  navigator.clipboard.writeText(lastPost).then(()=>{
+    const btn = event.target;
+    btn.textContent='Copied';
+    setTimeout(()=>btn.textContent='Copy post',1500);
+  });
+}
+
+function showErr(msg){
+  const el = document.getElementById('err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+</script>
+</body>
+</html>
